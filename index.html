@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zen Kanban - Zero-Dependency Project Board</title>
+  <meta name="description" content="A premium, zero-dependency Kanban board built with HTML5 native drag-and-drop and persistent local storage.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-midnight">
+  <!-- Dynamic Background Ambient Blobs -->
+  <div class="ambient-blob blob-1"></div>
+  <div class="ambient-blob blob-2"></div>
+  <div class="ambient-blob blob-3"></div>
+
+  <div class="app-container">
+    <!-- Header Control Area -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="4" height="18" rx="1.5" fill="var(--accent)"/>
+            <rect x="10" y="3" width="4" height="12" rx="1.5" fill="var(--accent)" opacity="0.75"/>
+            <rect x="17" y="3" width="4" height="6" rx="1.5" fill="var(--accent)" opacity="0.5"/>
+          </svg>
+          <h1>Zen Kanban</h1>
+        </div>
+        <p class="tagline">Local-first, zero-dependency task flows</p>
+      </div>
+
+      <div class="header-right">
+        <!-- Theme Selector -->
+        <div class="control-group">
+          <label for="themeSelect">Theme</label>
+          <select id="themeSelect" class="theme-select">
+            <option value="theme-midnight" selected>Midnight Glass</option>
+            <option value="theme-emerald">Emerald Oasis</option>
+            <option value="theme-cyberpunk">Cyberpunk Neon</option>
+            <option value="theme-nord">Nordic Ice</option>
+            <option value="theme-sunset">Sunset Glow</option>
+          </select>
+        </div>
+
+        <!-- Utility Buttons -->
+        <button id="toggleStatsBtn" class="btn btn-secondary btn-icon" title="Toggle Dashboard Statistics">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          <span>Stats</span>
+        </button>
+
+        <button id="exportBtn" class="btn btn-secondary btn-icon" title="Export Board Config to JSON">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Export</span>
+        </button>
+
+        <button id="importBtn" class="btn btn-secondary btn-icon" title="Import Board Config from JSON">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Import</span>
+        </button>
+
+        <button id="resetBtn" class="btn btn-danger btn-icon" title="Reset Board to Default Demo Data">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Toolbar: Search, Filters, and Add Column -->
+    <section class="board-toolbar">
+      <div class="toolbar-filters">
+        <div class="search-wrapper">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search tasks, descriptions, tags...">
+          <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">&times;</button>
+        </div>
+
+        <select id="filterPriority" class="filter-select">
+          <option value="all">All Priorities</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+
+        <select id="filterDueDate" class="filter-select">
+          <option value="all">All Deadlines</option>
+          <option value="overdue">Overdue</option>
+          <option value="due-today">Due Today</option>
+          <option value="due-week">Due This Week</option>
+        </select>
+
+        <select id="filterTag" class="filter-select">
+          <option value="all">All Tags</option>
+          <!-- Filled dynamically -->
+        </select>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="addColumnBtn" class="btn btn-primary btn-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Add Column</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Analytics Dashboard (Collapsible) -->
+    <section id="statsDashboard" class="stats-dashboard collapsible collapsed">
+      <div class="dashboard-header">
+        <h3>Board Analytics</h3>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total Tasks</span>
+          <span id="statTotal" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Completion Rate</span>
+          <div class="progress-radial-wrapper">
+            <span id="statCompletion" class="stat-value">0%</span>
+            <div class="progress-radial-bar" id="statRadialBar"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Urgent & High</span>
+          <span id="statPriorityCount" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Overdue Tasks</span>
+          <span id="statOverdueCount" class="stat-value overdue-alert">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Kanban Board Workspace -->
+    <main id="kanbanBoard" class="kanban-board">
+      <!-- Columns are loaded dynamically here by app.js -->
+    </main>
+  </div>
+
+  <!-- Task Modal (Add / Edit) -->
+  <div id="taskModal" class="modal-overlay">
+    <div class="modal-box card-blur">
+      <div class="modal-header">
+        <h2 id="modalTitle">Edit Task</h2>
+        <button class="modal-close" id="closeTaskModal">&times;</button>
+      </div>
+      <form id="taskForm" class="modal-body">
+        <input type="hidden" id="taskFormId">
+        <input type="hidden" id="taskFormColumnId">
+
+        <div class="form-group">
+          <label for="taskTitleInput">Task Title *</label>
+          <input type="text" id="taskTitleInput" placeholder="What needs to be done?" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label for="taskDescInput">Description</label>
+          <textarea id="taskDescInput" rows="3" placeholder="Add detailed notes, links, or context..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskPriorityInput">Priority</label>
+            <select id="taskPriorityInput">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="taskDueDateInput">Due Date</label>
+            <input type="date" id="taskDueDateInput">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="taskTagsInput">Tags (comma separated)</label>
+          <input type="text" id="taskTagsInput" placeholder="feature, bug, docs, frontend">
+          <div class="tags-preview" id="tagsPreview"></div>
+        </div>
+
+        <!-- Subtasks Checklist Section -->
+        <div class="form-group subtasks-section">
+          <label>Checklist / Subtasks</label>
+          <div class="checklist-input-group">
+            <input type="text" id="newSubtaskInput" placeholder="Add checklist item...">
+            <button type="button" id="addSubtaskBtn" class="btn btn-secondary">Add</button>
+          </div>
+          <ul id="checklistItemsList" class="checklist-items-list">
+            <!-- Loaded dynamically -->
+          </ul>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelTaskBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveTaskBtn">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Column Name Modal -->
+  <div id="columnModal" class="modal-overlay">
+    <div class="modal-box card-blur modal-small">
+      <div class="modal-header">
+        <h2 id="columnModalTitle">Add Column</h2>
+        <button class="modal-close" id="closeColumnModal">&times;</button>
+      </div>
+      <form id="columnForm" class="modal-body">
+        <input type="hidden" id="columnFormId">
+        <div class="form-group">
+          <label for="columnTitleInput">Column Name *</label>
+          <input type="text" id="columnTitleInput" placeholder="e.g. Code Review, Blocked..." required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelColumnBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveColumnBtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Import Board Modal -->
+  <div id="importModal" class="modal-overlay">
+    <div class="modal-box card-blur">
+      <div class="modal-header">
+        <h2>Import Kanban Data</h2>
+        <button class="modal-close" id="closeImportModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">Paste board JSON below to replace the current workspace. This will overwrite existing items.</p>
+        <textarea id="importJsonArea" rows="10" placeholder='{ "columns": [...], "tasks": [...] }'></textarea>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelImportBtn">Cancel</button>
+          <button type="button" class="btn btn-primary" id="submitImportBtn">Apply Import</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Overlay -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
